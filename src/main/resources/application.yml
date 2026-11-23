@@ -1,0 +1,18 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: pbm-claims-lab
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    try-it-out-enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

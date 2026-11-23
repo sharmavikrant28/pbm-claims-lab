@@ -1,0 +1,74 @@
+### 1. See the seeded reference data
+GET http://localhost:8080/api/reference
+
+### 2. Generic drug: pays at MAC price, goes toward the deductible
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{"pharmacyId":"PH-001","rxNumber":"RX1001","fillNumber":0,"memberId":"M1001","ndc":"11111-2222-01",
+ "quantity":30,"daysSupply":30,"dateOfService":"2026-12-01","usualAndCustomary":12.00}
+
+### 3. Same claim again (switch retry): returns the original answer, duplicate=true
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{"pharmacyId":"PH-001","rxNumber":"RX1001","fillNumber":0,"memberId":"M1001","ndc":"11111-2222-01",
+ "quantity":30,"daysSupply":30,"dateOfService":"2026-12-01","usualAndCustomary":12.00}
+
+### 4. Brand drug: AWP minus 15% + fee, deductible then $40 copay
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{"pharmacyId":"PH-001","rxNumber":"RX1002","fillNumber":0,"memberId":"M1001","ndc":"22222-3333-01",
+ "quantity":30,"daysSupply":30,"dateOfService":"2026-12-01","usualAndCustomary":400.00}
+
+### 5. Specialty drug with prior auth on file: $250 specialty copay
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{"pharmacyId":"PH-001","rxNumber":"RX1003","fillNumber":0,"memberId":"M1001","ndc":"33333-4444-01",
+ "quantity":2,"daysSupply":28,"dateOfService":"2026-12-01","usualAndCustomary":9000.00}
+
+### 6. Specialty drug after the PA expired: reject 75
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{"pharmacyId":"PH-001","rxNumber":"RX1004","fillNumber":0,"memberId":"M1001","ndc":"33333-4444-01",
+ "quantity":2,"daysSupply":28,"dateOfService":"2027-07-01","usualAndCustomary":9000.00}
+
+### 7. Terminated member: reject 65
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{"pharmacyId":"PH-001","rxNumber":"RX1005","fillNumber":0,"memberId":"M1002","ndc":"11111-2222-01",
+ "quantity":30,"daysSupply":30,"dateOfService":"2026-12-01","usualAndCustomary":12.00}
+
+### 8. Drug not on formulary: reject 70
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{"pharmacyId":"PH-001","rxNumber":"RX1006","fillNumber":0,"memberId":"M1001","ndc":"99999-0000-01",
+ "quantity":30,"daysSupply":30,"dateOfService":"2026-12-01","usualAndCustomary":12.00}
+
+### 9. Too many tablets: reject 76
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{"pharmacyId":"PH-001","rxNumber":"RX1007","fillNumber":0,"memberId":"M1001","ndc":"11111-2222-01",
+ "quantity":90,"daysSupply":30,"dateOfService":"2026-12-01","usualAndCustomary":12.00}
+
+### 10. Out-of-network pharmacy: reject 50
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{"pharmacyId":"PH-999","rxNumber":"RX1008","fillNumber":0,"memberId":"M1001","ndc":"11111-2222-01",
+ "quantity":30,"daysSupply":30,"dateOfService":"2026-12-01","usualAndCustomary":12.00}
+
+### 11. Check the member's accumulators
+GET http://localhost:8080/api/members/M1001/accumulators/2026
+
+### 12. Reverse a claim (paste a claimId from a PAID response)
+POST http://localhost:8080/api/claims/PASTE-CLAIM-ID/reversal
+
+### 13. See the outbox events (published by the relay every 2 seconds)
+GET http://localhost:8080/api/outbox

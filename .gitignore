@@ -1,0 +1,13 @@
+target/
+build/
+out/
+.gradle/
+.idea/workspace.xml
+.idea/shelf/
+*.iml
+.claude/settings.local.json
+.env
+.idea/
+.vscode/
+.DS_Store
+run/
